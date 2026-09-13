@@ -138,13 +138,7 @@ function formatMult(x: number): string {
   return `×${x.toFixed(1).replace(/\.0$/, "")}`;
 }
 
-export function SlotApp({
-  edition: initialEdition = "classic",
-  admin = false,
-}: {
-  edition?: "classic" | "ramon";
-  admin?: boolean;
-}) {
+export function SlotApp({ admin }: { admin?: boolean }) {
   const [phase, setPhase] = useState<GamePhase>("start");
   const [assets, setAssets] = useState<SlotAssets | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -189,7 +183,6 @@ export function SlotApp({
   const [paidExpand, setPaidExpand] = useState<SymbolId | null>(null);
   const [fsAward, setFsAward] = useState(10);
   const [fsSummary, setFsSummary] = useState(false);
-  const [edition, setEdition] = useState<"classic" | "ramon">(initialEdition);
 
   const lineHintRef = useRef(0);
   const busy = useRef(false);
@@ -206,8 +199,6 @@ export function SlotApp({
   const fsBankRef = useRef(0);
   const roundStakeRef = useRef(0);
   const pendingKindRef = useRef<PlayKind>("spin");
-  const editionRef = useRef(edition);
-  editionRef.current = edition;
 
   creditsRef.current = credits;
   phaseRef.current = phase;
@@ -220,14 +211,14 @@ export function SlotApp({
   const expandArmed = Boolean(paidExpand) && freeSpins === 0;
   const spinCost = expandArmed ? bet * BUY_EXPAND_MULT : bet;
   const grid = useMemo(() => gridFromStops(stops), [stops]);
-  const brandTitle = edition === "ramon" ? "Book of Ra(mon)" : copy.title;
-  const brandSub = edition === "ramon" ? "Made by Crydo5" : copy.subtitle;
-  const gram = edition === "ramon";
-  const money = (n: number) => formatCredits(n, lang, gram);
-  const creditsLabel = gram ? (lang === "de" ? "Gramm" : "Grams") : copy.credits;
+  const brandTitle = copy.title;
+  const brandSub = copy.subtitle;
+  const decimal = true;
+  const money = (n: number) => formatCredits(n, lang, decimal);
+  const creditsLabel = copy.credits;
 
   const recordPlay = useCallback((kind: PlayKind, stake: number, payout: number, detail = "") => {
-    const game = editionRef.current === "ramon" ? "ramon" : "book";
+    const game = "book";
     void commitRound({ data: { game, kind, stake, payout, detail } })
       .then((r) => {
         if (typeof r.credits === "number") setCredits(r.credits);
@@ -638,9 +629,8 @@ export function SlotApp({
     return () => window.removeEventListener("keydown", onKey);
   }, [autoLeft, buyKind, doSpin, phase, showAuto, showBuy, showDeposit, showPaytable]);
 
-  const enter = (ed: "classic" | "ramon" = edition) => {
-    setEdition(ed);
-    document.title = ed === "ramon" ? "Book of Ra(mon)" : "Book of Ra";
+  const enter = () => {
+    document.title = "Book of Ra";
     audio.unlock();
     audio.setMuted(muted);
     audio.enter();
@@ -784,10 +774,9 @@ export function SlotApp({
         error={loadError}
         lang={lang}
         muted={muted}
-        featured={initialEdition}
         onLang={setLang}
         onMute={() => setMuted((m) => !m)}
-        onEnter={() => enter(initialEdition)}
+        onEnter={enter}
       />
     );
   }
@@ -931,7 +920,7 @@ export function SlotApp({
                   copy={copy}
                   reduced={reducedMotion}
                   fullscreen={false}
-                  gram={gram}
+                  decimal={decimal}
                 />
               )}
               {turbo && (
@@ -964,7 +953,7 @@ export function SlotApp({
               />
               <Stepper
                 label={copy.betPerLine}
-                value={gram ? (betPerLine * 0.1).toFixed(2) : String(betPerLine)}
+                value={decimal ? (betPerLine * 0.1).toFixed(2) : String(betPerLine)}
                 disabled={controlsLocked}
                 onMinus={() => changeBet(-1)}
                 onPlus={() => changeBet(1)}
@@ -1086,7 +1075,7 @@ export function SlotApp({
             reduced={reducedMotion}
             fullscreen
             summary={fsSummary}
-            gram={gram}
+            decimal={decimal}
           />
         )}
 
@@ -1109,7 +1098,7 @@ export function SlotApp({
           lang={lang}
           stake={gambleStake}
           flip={cardFlip}
-          gram={gram}
+          decimal={decimal}
           onCollect={collectGamble}
           onPick={pickColor}
         />
@@ -1123,7 +1112,7 @@ export function SlotApp({
           betPerLine={betPerLine}
           bet={bet}
           lines={lines}
-          gram={gram}
+          decimal={decimal}
           onClose={() => setShowPaytable(false)}
         />
       )}
@@ -1132,7 +1121,7 @@ export function SlotApp({
         <DepositPanel
           copy={copy}
           lang={lang}
-          gram={gram}
+          decimal={decimal}
           twintPhone={twintPhone}
           twintName={twintName}
           pending={pendingDeposits}
@@ -1171,7 +1160,7 @@ export function SlotApp({
           bet={bet}
           credits={credits}
           armed={paidExpand}
-          gram={gram}
+          decimal={decimal}
           onClose={() => setShowBuy(false)}
           onChoose={confirmBuy}
           onDisable={() => {
@@ -1205,7 +1194,6 @@ function StartScreen({
   error,
   lang,
   muted,
-  featured,
   onLang,
   onMute,
   onEnter,
@@ -1215,7 +1203,6 @@ function StartScreen({
   error: boolean;
   lang: Lang;
   muted: boolean;
-  featured: "classic" | "ramon";
   onLang: (l: Lang) => void;
   onMute: () => void;
   onEnter: () => void;
@@ -1248,11 +1235,8 @@ function StartScreen({
       <div className="relative z-10 w-full max-w-lg px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] text-center">
         <p className="font-display text-sm uppercase tracking-[0.42em] text-gold">{copy.subtitle}</p>
         <h1 className="mt-2 font-display text-4xl font-semibold tracking-[0.12em] text-gold-2 text-balance sm:text-5xl">
-          {featured === "ramon" ? "Book of Ra(mon)" : copy.title}
+          {copy.title}
         </h1>
-        {featured === "ramon" && (
-          <p className="mt-3 font-display text-sm uppercase tracking-[0.28em] text-gold">Made by Crydo5</p>
-        )}
         <p className="mt-6 font-display text-xs uppercase tracking-[0.28em] text-muted">
           {error ? copy.loading : copy.tapToEnter}
         </p>
@@ -1278,7 +1262,7 @@ function WinBurst({
   reduced,
   fullscreen,
   summary = false,
-  gram = false,
+  decimal = false,
 }: {
   amount: number;
   bet: number;
@@ -1288,7 +1272,7 @@ function WinBurst({
   reduced: boolean;
   fullscreen: boolean;
   summary?: boolean;
-  gram?: boolean;
+  decimal?: boolean;
 }) {
   const x = stakeMult(amount, bet);
   const tier = burstTier(amount, bet) ?? "chip";
@@ -1428,7 +1412,7 @@ function WinBurst({
           </p>
         )}
         <p className={cn("title-glow mt-1 font-display font-semibold tabular-nums tracking-wide text-gold-2", size, vis !== "chip" && "win-shimmer")}>
-          {formatCredits(Math.max(live, 0), lang, gram)}
+          {formatCredits(Math.max(live, 0), lang, decimal)}
         </p>
         {x > 1 && (
           <p className={cn("win-mult mt-1 font-display font-semibold text-gold", vis === "epic" ? "text-2xl tracking-[0.22em] sm:text-4xl" : vis === "mega" ? "text-xl tracking-[0.2em] sm:text-3xl" : "text-base tracking-[0.18em] sm:text-xl")}>
@@ -1547,7 +1531,7 @@ function GamblePanel({
   lang,
   stake,
   flip,
-  gram = false,
+  decimal = false,
   onCollect,
   onPick,
 }: {
@@ -1555,7 +1539,7 @@ function GamblePanel({
   lang: Lang;
   stake: number;
   flip: "red" | "black" | null;
-  gram?: boolean;
+  decimal?: boolean;
   onCollect: () => void;
   onPick: (c: "red" | "black") => void;
 }) {
@@ -1564,7 +1548,7 @@ function GamblePanel({
       <div className="tomb-panel w-full max-w-sm rounded-t-2xl p-5 sm:rounded-2xl">
         <h2 className="font-display text-lg text-gold-2">{copy.gamble}</h2>
         <p className="mt-1 text-sm text-muted">{copy.gambleHint}</p>
-        <p className="mt-3 font-display text-3xl tabular-nums text-gold-2">{formatCredits(stake, lang, gram)}</p>
+        <p className="mt-3 font-display text-3xl tabular-nums text-gold-2">{formatCredits(stake, lang, decimal)}</p>
         <div className="mt-4 flex justify-center">
           <div className="size-28 overflow-hidden rounded-lg ring-1 ring-gold/40">
             {flip ? (
@@ -1599,7 +1583,7 @@ function Paytable({
   betPerLine,
   bet,
   lines,
-  gram = false,
+  decimal = false,
   onClose,
 }: {
   copy: ReturnType<typeof t>;
@@ -1608,7 +1592,7 @@ function Paytable({
   betPerLine: number;
   bet: number;
   lines: number;
-  gram?: boolean;
+  decimal?: boolean;
   onClose: () => void;
 }) {
   return (
@@ -1623,13 +1607,13 @@ function Paytable({
         <p className="mt-3 font-display text-xs uppercase tracking-[0.18em] text-muted">{copy.picturePays}</p>
         <div className="mt-2 space-y-2">
           {PICTURE_SYMBOLS.map((id) => (
-            <PayRow key={id} assets={assets} id={id} betPerLine={betPerLine} bet={bet} lang={lang} copy={copy} gram={gram} />
+            <PayRow key={id} assets={assets} id={id} betPerLine={betPerLine} bet={bet} lang={lang} copy={copy} decimal={decimal} />
           ))}
         </div>
         <p className="mt-4 font-display text-xs uppercase tracking-[0.18em] text-muted">{copy.royalPays}</p>
         <div className="mt-2 space-y-2">
           {ROYAL_SYMBOLS.map((id) => (
-            <PayRow key={id} assets={assets} id={id} betPerLine={betPerLine} bet={bet} lang={lang} copy={copy} gram={gram} />
+            <PayRow key={id} assets={assets} id={id} betPerLine={betPerLine} bet={bet} lang={lang} copy={copy} decimal={decimal} />
           ))}
         </div>
         <p className="mt-5 font-display text-xs uppercase tracking-[0.18em] text-gold">{copy.linesTitle}</p>
@@ -1658,7 +1642,7 @@ function PayRow({
   bet,
   lang,
   copy,
-  gram = false,
+  decimal = false,
 }: {
   assets: SlotAssets;
   id: SymbolId;
@@ -1666,7 +1650,7 @@ function PayRow({
   bet: number;
   lang: Lang;
   copy: ReturnType<typeof t>;
-  gram?: boolean;
+  decimal?: boolean;
 }) {
   const pays = id === "book" ? SCATTER_PAYS : LINE_PAYS[id as Exclude<SymbolId, "book">];
   return (
@@ -1689,7 +1673,7 @@ function PayRow({
             const amount = id === "book" ? m * bet : m * betPerLine;
             return (
               <span key={n}>
-                {n}× {formatCredits(amount, lang, gram)}
+                {n}× {formatCredits(amount, lang, decimal)}
               </span>
             );
           })}
@@ -1762,7 +1746,7 @@ function LineMap({ active }: { active: number }) {
 function DepositPanel({
   copy,
   lang,
-  gram,
+  decimal,
   twintPhone,
   twintName,
   pending,
@@ -1771,7 +1755,7 @@ function DepositPanel({
 }: {
   copy: ReturnType<typeof t>;
   lang: Lang;
-  gram: boolean;
+  decimal: boolean;
   twintPhone: string;
   twintName: string;
   pending: DepositRow[];
@@ -1809,7 +1793,7 @@ function DepositPanel({
           ))}
         </div>
         <p className="mt-2 text-center font-display text-xs uppercase tracking-[0.18em] text-gold">
-          {chf} CHF → {formatCredits(chf, lang, gram)}
+          {chf} CHF → {formatCredits(chf, lang, decimal)}
         </p>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <button
@@ -1924,7 +1908,7 @@ function BuyPanel({
   bet,
   credits,
   armed,
-  gram = false,
+  decimal = false,
   onClose,
   onChoose,
   onDisable,
@@ -1934,7 +1918,7 @@ function BuyPanel({
   bet: number;
   credits: number;
   armed: SymbolId | null;
-  gram?: boolean;
+  decimal?: boolean;
   onClose: () => void;
   onChoose: (k: "freeSpins" | "expand") => void;
   onDisable: () => void;
@@ -1951,12 +1935,12 @@ function BuyPanel({
         <button type="button" onClick={() => onChoose("freeSpins")} className="tomb-panel mt-4 w-full rounded-xl p-4 text-left">
           <p className="font-display text-sm tracking-[0.16em] text-gold-2">{copy.buyFsTitle}</p>
           <p className="mt-1 text-xs text-muted">{copy.buyFsBody}</p>
-          <p className="mt-2 font-display text-gold">{copy.buyFsCost} · {formatCredits(bet * BUY_FS_MULT, lang, gram)}</p>
+          <p className="mt-2 font-display text-gold">{copy.buyFsCost} · {formatCredits(bet * BUY_FS_MULT, lang, decimal)}</p>
         </button>
         <button type="button" onClick={() => onChoose("expand")} className="tomb-panel mt-3 w-full rounded-xl p-4 text-left">
           <p className="font-display text-sm tracking-[0.16em] text-gold-2">{copy.buyExpandTitle}</p>
           <p className="mt-1 text-xs text-muted">{copy.buyExpandBody}</p>
-          <p className="mt-2 font-display text-gold">{copy.buyExpandCost} · {formatCredits(bet * BUY_EXPAND_MULT, lang, gram)}</p>
+          <p className="mt-2 font-display text-gold">{copy.buyExpandCost} · {formatCredits(bet * BUY_EXPAND_MULT, lang, decimal)}</p>
         </button>
         {armed && (
           <button type="button" onClick={onDisable} className="mt-3 h-11 w-full rounded-md border border-gold/40 font-display text-sm tracking-[0.16em] text-gold-2">
@@ -1964,7 +1948,7 @@ function BuyPanel({
           </button>
         )}
         <p className="mt-3 text-center font-display text-xs tabular-nums text-muted">
-          {gram ? (lang === "de" ? "Gramm" : "Grams") : copy.credits}: {formatCredits(credits, lang, gram)}
+          {copy.credits}: {formatCredits(credits, lang, decimal)}
         </p>
       </div>
     </div>

@@ -381,12 +381,12 @@ export function totalBet(lines: number, betPerLine: number): number {
   return lines * betPerLine;
 }
 
-export function formatCredits(n: number, lang: "de" | "en", gram = false): string {
-  if (gram) {
-    return `${(n * 0.1).toLocaleString(lang === "de" ? "de-DE" : "en-US", {
+export function formatCredits(n: number, lang: "de" | "en", decimal = false): string {
+  if (decimal) {
+    return (n * 0.1).toLocaleString(lang === "de" ? "de-DE" : "en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    })} G`;
+    });
   }
   return Math.round(n).toLocaleString(lang === "de" ? "de-DE" : "en-US");
 }

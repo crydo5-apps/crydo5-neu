@@ -16,10 +16,10 @@ const GAMES = [
     img: "/bg/roulette-table.jpg",
   },
   {
-    to: "/ramon" as const,
-    title: "Book of Ra(mon)",
-    tag: "Slot · Gramm · Crydo5",
-    img: "/bg/tomb.jpg",
+    to: "/cowboy" as const,
+    title: "El Cowboy",
+    tag: "Slot · 6×5 Cluster · Revolver",
+    img: "/cowboy/cowboy-hat.png",
   },
 ];
 

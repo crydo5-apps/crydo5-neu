@@ -6,7 +6,7 @@ import { audio } from "@/lib/slot/audio";
 import { t } from "@/lib/slot/copy";
 import { formatCredits } from "@/lib/slot/engine";
 import { LogButton, PlayLogSheet } from "@/components/casino/PlayLog";
-import { getWallet, requestDeposit, type DepositRow } from "@/lib/wallet";
+import { getWallet, saveWallet, requestDeposit, type DepositRow } from "@/lib/wallet";
 import { commitRound } from "@/lib/play";
 import {
   CHIP_VALUES,
