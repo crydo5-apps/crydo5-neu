@@ -506,7 +506,7 @@ export function positionKey(position: readonly [number, number] | readonly numbe
 }
 
 export function currency(n: number, lang: "de" | "en" = "de"): string {
-  return (n / 10).toLocaleString(lang === "de" ? "de-CH" : "en-US", {
+  return (n / 100).toLocaleString(lang === "de" ? "de-CH" : "en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });

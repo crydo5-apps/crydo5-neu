@@ -383,7 +383,7 @@ export function totalBet(lines: number, betPerLine: number): number {
 
 export function formatCredits(n: number, lang: "de" | "en", decimal = false): string {
   if (decimal) {
-    return (n * 0.1).toLocaleString(lang === "de" ? "de-DE" : "en-US", {
+    return (n * 0.01).toLocaleString(lang === "de" ? "de-DE" : "en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
