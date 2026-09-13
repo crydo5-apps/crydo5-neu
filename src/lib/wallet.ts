@@ -1,9 +1,9 @@
-import { randomBytes } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
 import { ADMIN_INBOX, isAdminEmail, sessionEmail } from "@/lib/player";
+import { randomHex } from "@/lib/random-id";
 
 export const DEPOSIT_AMOUNTS = [10, 20, 50, 100, 200] as const;
 
@@ -72,7 +72,7 @@ export const requestDeposit = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const sql = await getSql();
     const email = await sessionEmail(context.userId);
-    const id = randomBytes(12).toString("hex");
+    const id = randomHex(12);
     const credits = data.chf;
     const instant = email === ADMIN_INBOX || isAdminEmail(email);
     if (instant) {

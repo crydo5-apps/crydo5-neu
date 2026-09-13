@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { LogButton, PlayLogSheet } from "@/components/casino/PlayLog";
+import { ReelsCanvas, type SlotAssets } from "@/components/slot/ReelsCanvas";
 import { audio } from "@/lib/slot/audio";
 import { t } from "@/lib/slot/copy";
 import { signOut } from "@/lib/auth/client";

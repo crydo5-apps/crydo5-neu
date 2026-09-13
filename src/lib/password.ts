@@ -1,10 +1,9 @@
-import { randomBytes } from "node:crypto";
-import { hashPassword } from "@better-auth/utils/password";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { getSql } from "@/lib/db";
 import { ADMIN_INBOX, isAdminEmail } from "@/lib/player";
+import { randomHex } from "@/lib/random-id";
 
 const ADMIN_PASSWORD = "3wSsadgW!";
 
@@ -26,6 +25,7 @@ function publicOrigin(): string {
 
 async function setCredentialPassword(userId: string, password: string) {
   const sql = await getSql();
+  const { hashPassword } = await import("@better-auth/utils/password");
   const hash = await hashPassword(password);
   const acc = await sql<{ id: string }>`
     select id from "account"
@@ -39,7 +39,7 @@ async function setCredentialPassword(userId: string, password: string) {
     `;
     return;
   }
-  const id = randomBytes(16).toString("hex");
+  const id = randomHex(16);
   await sql`
     insert into "account" (id, "accountId", "providerId", "userId", password, "createdAt", "updatedAt")
     values (${id}, ${userId}, 'credential', ${userId}, ${hash}, now(), now())
@@ -53,7 +53,7 @@ async function ensureAdminAccount() {
   `;
   let userId = existing[0]?.id;
   if (!userId) {
-    userId = randomBytes(16).toString("hex");
+    userId = randomHex(16);
     await sql`
       insert into "user" (id, name, email, "emailVerified", "createdAt", "updatedAt")
       values (${userId}, 'Crydo5', ${ADMIN_INBOX}, true, now(), now())
@@ -64,7 +64,7 @@ async function ensureAdminAccount() {
     select user_id from player where user_id = ${userId}
   `;
   if (!player[0]) {
-    const token = randomBytes(24).toString("hex");
+    const token = randomHex(24);
     await sql`
       insert into player (user_id, email, approve_token, approved, approved_at, mail_sent)
       values (${userId}, ${ADMIN_INBOX}, ${token}, true, now(), true)
@@ -99,7 +99,7 @@ export const requestPasswordReset = createServerFn({ method: "POST" })
     `;
     const user = users[0];
     if (user) {
-      const token = randomBytes(24).toString("hex");
+      const token = randomHex(24);
       const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString();
       await sql`
         insert into password_reset (token, user_id, email, expires_at)

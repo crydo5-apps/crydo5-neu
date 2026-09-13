@@ -1,8 +1,8 @@
-import { randomBytes } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
 import { isAdminEmail, sessionEmail } from "@/lib/player";
+import { randomHex } from "@/lib/random-id";
 
 export type DashGame = {
   id: string;
@@ -190,7 +190,7 @@ export async function ensureDashboardToken(): Promise<string> {
     select dashboard_token from shop_settings where id = 1
   `;
   if (rows[0]?.dashboard_token) return rows[0].dashboard_token;
-  const token = randomBytes(24).toString("hex");
+  const token = randomHex(24);
   await sql`
     insert into shop_settings (id, twint_phone, twint_name, dashboard_token)
     values (1, '', '', ${token})
@@ -221,7 +221,7 @@ export const rotateDashboardToken = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const email = await sessionEmail(context.userId);
     if (!isAdminEmail(email)) return { ok: false as const, token: "" };
-    const token = randomBytes(24).toString("hex");
+    const token = randomHex(24);
     const sql = await getSql();
     await sql`
       insert into shop_settings (id, twint_phone, twint_name, dashboard_token)

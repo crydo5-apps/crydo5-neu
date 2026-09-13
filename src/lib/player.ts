@@ -1,9 +1,9 @@
-import { randomBytes } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
+import { randomHex } from "@/lib/random-id";
 
 export const ADMIN_INBOX = "info@harmonai.ch";
 const ADMIN_DELIVER = ["thhaessig84@gmail.com", "info@harmonai.ch"] as const;
@@ -153,7 +153,7 @@ export const registerPlayer = createServerFn({ method: "POST" })
     `;
     let row = existing[0];
     if (!row) {
-      const token = randomBytes(24).toString("hex");
+      const token = randomHex(24);
       const inserted = await sql<PlayerRow>`
         insert into player (user_id, email, approve_token, approved, approved_at, mail_sent)
         values (

@@ -1,8 +1,8 @@
-import { randomBytes } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
+import { randomHex } from "@/lib/random-id";
 
 export const PLAY_GAMES = ["book", "ramon", "roulette", "shop"] as const;
 export const PLAY_KINDS = [
@@ -46,7 +46,7 @@ export async function insertPlayLog(opts: {
   detail?: string;
 }) {
   const sql = await getSql();
-  const id = randomBytes(12).toString("hex");
+  const id = randomHex(12);
   const delta = opts.payout - opts.stake;
   await sql`
     insert into play_log (id, user_id, game, kind, stake, payout, delta, balance, detail)
