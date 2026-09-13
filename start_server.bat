@@ -7,5 +7,6 @@ echo   Oeffne: http://localhost:8080
 echo   Beenden: Fenster schliessen oder Ctrl+C
 echo ============================================
 set PATH=%~dp0;%PATH%
-npm run dev
+set PATH=%~dp0node_modules\.bin;%PATH%
+node scripts/with-app-env.mjs vite dev --host 0.0.0.0 --port 8080
 pause
