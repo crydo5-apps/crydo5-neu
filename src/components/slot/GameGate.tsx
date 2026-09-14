@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import { RedirectToSignIn } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { getMyAccess, registerPlayer } from "@/lib/player";
-import { authEnabled } from "@/lib/auth/client";
 
 export function GameGate({ children }: { children: (ctx: { admin: boolean }) => ReactNode }) {
   const { user, isPending } = useCurrentUserState();
@@ -25,7 +24,6 @@ export function GameGate({ children }: { children: (ctx: { admin: boolean }) => 
 
   useEffect(() => {
     if (isPending || !user) return;
-    if (!authEnabled) { setAccess("ok"); return; }
     let live = true;
     void refresh().catch(() => {
       if (live) setAccess("wait");
