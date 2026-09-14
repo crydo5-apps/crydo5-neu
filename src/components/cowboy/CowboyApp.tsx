@@ -1055,7 +1055,7 @@ function DepositModal({ lang, c, twintPhone, twintName, pending, onClose, onRefr
     }
   };
 
-  const moneyFmt = (n: number) => currency(n, lang);
+  const moneyFmt = (n: number) => currency(n * 100, lang);
 
   return (
     <Modal onClose={onClose} title="Aufladen" subtitle={`${chf} CHF → ${moneyFmt(chf)}`}>
